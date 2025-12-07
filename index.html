@@ -101,7 +101,6 @@ const emojiPicker=document.getElementById("emojiPicker");
 
 const EMOJI_LIST=["😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊","😋","😎","😍","😘","🥰","🙂","🤗","🤩","🤔","😐","😶","🙄","😏","😣","😥","😮","😯","😪","😫","😴","😌","😛","😜","😝","😒","😓","😔","😕","🙃","🥲","😲","😶‍🌫️","😳","🥺","😢","😭","😤","😡","😠","🤬","😈","👻","💀","🤖","👽","👍","👎","🙏","👏","💖","❤️","🔥","🌟","✨","🎉","🎶","🌹","🌙"];
 
-function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 function nowTime(){const d=new Date();let h=d.getHours();let m=String(d.getMinutes()).padStart(2,'0');const a=h>=12?"PM":"AM";h=h%12||12;return `${h}:${m} ${a}`;}
 
 function renderMessage(nickVal,textVal){
@@ -150,7 +149,20 @@ joinBtn.addEventListener("click",()=>{
 });
 
 sendBtn.addEventListener("click",sendMessage);
-msgBox.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}else{sendTyping();}});
+
+// ======= FIXED: Enter key double-send =====
+msgBox.addEventListener("keydown", e => {
+  if(e.key==="Enter" && !e.shiftKey){
+    e.preventDefault();
+    if(!msgBox.dataset.sending){
+      msgBox.dataset.sending="true";
+      sendMessage();
+      setTimeout(()=>{ msgBox.dataset.sending=""; },50);
+    }
+  } else {
+    sendTyping();
+  }
+});
 
 /* emoji picker */
 function populateEmoji(){emojiPicker.innerHTML="";EMOJI_LIST.forEach(e=>{const s=document.createElement("span");s.className="emoji";s.textContent=e;s.onclick=()=>{msgBox.value+=e;msgBox.focus();};emojiPicker.appendChild(s);});}
@@ -158,7 +170,6 @@ populateEmoji();
 
 emojiBtn.addEventListener("click",ev=>{ev.stopPropagation();emojiOpen=!emojiOpen;emojiPicker.style.display=emojiOpen?"flex":"none";document.body.appendChild(emojiPicker);});
 document.addEventListener("click",ev=>{if(emojiOpen){if(!emojiPicker.contains(ev.target)&&ev.target!==emojiBtn){emojiOpen=false;emojiPicker.style.display="none";}}});
-
 </script>
 </body>
 </html>
