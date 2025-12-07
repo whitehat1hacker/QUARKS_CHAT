@@ -78,7 +78,7 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Arial;background:var(-
     </div>
     <div class="inputBar">
       <button id="emojiBtn" class="iconBtn">😊</button>
-      <input id="msgBox" placeholder="Write a message — Enter sends (Shift+Enter newline)" />
+      <input id="msgBox" placeholder="Write a message — Enter sends" />
       <button id="sendBtn">Send</button>
     </div>
   </div>
@@ -101,18 +101,54 @@ settingsBtn.addEventListener("click",e=>{e.stopPropagation();settingsPanel.style
 bgOptions.forEach(o=>{o.addEventListener("click",()=>{switch(o.dataset.id){case"1":document.documentElement.style.setProperty('--bg','linear-gradient(135deg,#3a1c71,#d76d77,#ffaf7b)');break;case"2":document.documentElement.style.setProperty('--bg','linear-gradient(135deg,#ff6a88,#ff99ac)');break;case"3":document.documentElement.style.setProperty('--bg','linear-gradient(135deg,#11998e,#38ef7d)');break;case"4":document.documentElement.style.setProperty('--bg','linear-gradient(135deg,#0f0f0f,#1e1e1e)');break;}settingsPanel.style.display="none";});});
 widthBtns.forEach(b=>{b.addEventListener("click",()=>{document.documentElement.style.setProperty('--chat-width',b.dataset.width);});});
 
-function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 function nowTime(){const d=new Date(),h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),ampm=h>=12?"PM":"AM";h=h%12||12;return`${h}:${m} ${ampm}`;}
 function renderMessage(nickVal,textVal,statusVal){const wrap=document.createElement("div");wrap.className="bubble "+(nickVal===nick?"mine":"their");const meta=document.createElement("div");meta.className="meta";meta.textContent=nickVal;wrap.appendChild(meta);const t=document.createElement("div");t.innerText=textVal;wrap.appendChild(t);const footer=document.createElement("div");footer.style.display="flex";footer.style.justifyContent=nickVal===nick?"flex-end":"flex-start";footer.style.alignItems="center";footer.style.gap="6px";const time=document.createElement("span");time.className="time";time.textContent=nowTime();footer.appendChild(time);if(nickVal===nick){const r=document.createElement("span");r.className="receipt";r.textContent=statusVal==="seen"?"✓✓ Seen":statusVal==="delivered"?"✓ Delivered":"";footer.appendChild(r);}wrap.appendChild(footer);messagesEl.appendChild(wrap);messagesEl.scrollTop=messagesEl.scrollHeight;}
 
-function connectWS(){ws=new WebSocket(WS_URL);ws.onopen=()=>{ws.send(JSON.stringify({cmd:"join",channel:room,nick:nick}));};ws.onmessage=ev=>{try{const data=JSON.parse(ev.data);if(data.cmd==="chat"&&data.channel===room){if(data.nick!==nick){renderMessage(data.nick,data.text,"");}else{renderMessage(data.nick,data.text,"delivered");}}if(data.cmd==="typing"&&data.channel===room&&data.nick!==nick){typingStatus.textContent=`${data.nick} is typing…`;}if(data.cmd==="stoptyping"&&data.channel===room&&data.nick!==nick){typingStatus.textContent="";}}catch(e){console.warn("ws parse error",e);}};ws.onclose=()=>{typingStatus.textContent="Disconnected from server.";}}
+function connectWS(){
+  ws=new WebSocket(WS_URL);
+  ws.onopen=()=>{ws.send(JSON.stringify({cmd:"join",channel:room,nick:nick}));};
+  ws.onmessage=ev=>{
+    try{
+      const data=JSON.parse(ev.data);
+      if(data.cmd==="chat"&&data.channel===room){
+        if(data.nick!==nick){renderMessage(data.nick,data.text,"");}else{renderMessage(data.nick,data.text,"delivered");}
+      }
+      if(data.cmd==="typing"&&data.channel===room&&data.nick!==nick){typingStatus.textContent=`${data.nick} is typing…`;}
+      if(data.cmd==="stoptyping"&&data.channel===room&&data.nick!==nick){typingStatus.textContent="";}
+    }catch(e){console.warn("ws parse error",e);}
+  };
+  ws.onclose=()=>{typingStatus.textContent="Disconnected from server.";}
+}
 
-function sendMessage(){const text=msgBox.value.trim();if(!text||!ws||ws.readyState!==WebSocket.OPEN)return;renderMessage(nick,text,"");ws.send(JSON.stringify({cmd:"chat",text:text,channel:room}));msgBox.value="";ws.send(JSON.stringify({cmd:"stoptyping",channel:room,nick:nick}));}
-function sendTyping(){if(!ws||ws.readyState!==WebSocket.OPEN)return;ws.send(JSON.stringify({cmd:"typing",channel:room,nick:nick}));clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({cmd:"stoptyping",channel:room,nick:nick}));},900);}
+function sendMessage(){
+  const text=msgBox.value.trim();
+  if(!text||!ws||ws.readyState!==WebSocket.OPEN) return;
+  renderMessage(nick,text,"");
+  ws.send(JSON.stringify({cmd:"chat",text:text,channel:room}));
+  msgBox.value="";
+  ws.send(JSON.stringify({cmd:"stoptyping",channel:room,nick:nick}));
+}
+function sendTyping(){
+  if(!ws||ws.readyState!==WebSocket.OPEN) return;
+  ws.send(JSON.stringify({cmd:"typing",channel:room,nick:nick}));
+  clearTimeout(typingTimeout);
+  typingTimeout=setTimeout(()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({cmd:"stoptyping",channel:room,nick:nick}));},900);
+}
 
-joinBtn.addEventListener("click",()=>{const r=roomInput.value.trim(),n=nickInput.value.trim();if(!r||!n)return alert("Enter room and your name");room=r;nick=n;roomLabel.textContent="room: "+room;document.getElementById("joinArea").style.display="none";connectWS();});
+joinBtn.addEventListener("click",()=>{
+  const r=roomInput.value.trim(), n=nickInput.value.trim();
+  if(!r||!n) return alert("Enter room and your name");
+  room=r; nick=n;
+  roomLabel.textContent="room: "+room;
+  document.getElementById("joinArea").style.display="none";
+  connectWS();
+});
+
 sendBtn.addEventListener("click",sendMessage);
-msgBox.addEventListener("keydown",(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}else sendTyping();});
+msgBox.addEventListener("keydown",(e)=>{
+  if(e.key==="Enter"){e.preventDefault();sendMessage();}
+  else sendTyping();
+});
 </script>
 </body>
 </html>
