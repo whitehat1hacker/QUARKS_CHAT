@@ -1,154 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>quarks</title>
+<meta charset="UTF-8">
+<title>QUARKS</title>
 <style>
-:root{
-  --bg: linear-gradient(135deg,#3a1c71,#d76d77,#ffaf7b);
-  --chat-width: 100%;
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: 0.3s;
+    background: linear-gradient(135deg, #0f0f0f, #1e1e1e);
+    color: white;
 }
-html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Arial;background:var(--bg);}
-.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;}
-.card{
-  width:100%;max-width:var(--chat-width);
-  height:86vh;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;
-  background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(0,0,0,0.35);
-  border:1px solid rgba(255,255,255,0.04);
+
+#settingsBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 10px 14px;
+    background: #222;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.8;
 }
-.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,0.03)}
-.title{font-weight:700;color:#fff;display:flex;gap:10px;align-items:center;font-size:16px}
-.controls{display:flex;gap:8px;align-items:center}
-.btn {background:rgba(255,255,255,0.06);color:#fff;padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-size:14px}
-#joinArea{display:flex;gap:8px;padding:10px;align-items:center;flex-wrap:wrap;}
-#joinArea input{padding:10px;border-radius:10px;border:none;outline:none;background:rgba(255,255,255,0.03);color:#fff;flex:1;min-width:120px}
-#joinArea button{background:#ff7aa2;color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
-.chatArea{display:flex;flex-direction:column;flex:1;min-height:0;position:relative;}
-#messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-.bubble{max-width:72%;padding:10px 12px;border-radius:14px;color:#fff;word-wrap:break-word;box-shadow:0 4px 10px rgba(0,0,0,0.2)}
-.meta{font-size:12px;opacity:0.75;margin-bottom:4px}
-.mine{align-self:flex-end;background:linear-gradient(120deg,#4facfe,#00f2fe);border-bottom-right-radius:4px;text-align:right}
-.their{align-self:flex-start;background:linear-gradient(120deg,#ff9a9e,#fecfef);color:#111;border-bottom-left-radius:4px;text-align:left}
-.time{display:block;font-size:11px;opacity:0.75;margin-top:4px}
-.receipt{font-size:12px;opacity:0.8;margin-left:6px}
-#typingStatus{padding:6px 12px;font-size:13px;color:rgba(255,255,255,0.85);min-height:20px}
-.inputBar{display:flex;gap:8px;padding:10px;background:rgba(0,0,0,0.12);align-items:center}
-#msgBox{flex:1;padding:10px 12px;border-radius:12px;border:none;outline:none;background:rgba(255,255,255,0.04);color:#fff;font-size:15px}
-.iconBtn{background:rgba(255,255,255,0.06);border-radius:12px;padding:10px;border:none;color:#fff;cursor:pointer;font-size:18px}
-#sendBtn{background:#ff6a95;color:#fff;padding:10px 14px;border-radius:12px;border:none;cursor:pointer}
-#emojiPicker{position:absolute;bottom:60px;left:10px;width:250px;max-height:200px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);padding:8px;border-radius:12px;display:none;overflow:auto;flex-wrap:wrap;gap:5px;z-index:40}
-.emoji{font-size:20px;padding:6px;cursor:pointer}
-#settingsPanel{position:fixed;top:80px;right:10px;background:rgba(0,0,0,0.5);padding:12px;border-radius:10px;display:none;color:#fff;z-index:40;min-width:180px}
-.bgOption{padding:8px;margin:6px 0;border-radius:8px;cursor:pointer;text-align:center;background:rgba(255,255,255,0.03)}
+
+#settingsPanel {
+    position: absolute;
+    top: 50px;
+    right: 12px;
+    background: #111;
+    padding: 12px;
+    border-radius: 10px;
+    display: none;
+    width: 180px;
+}
+
+.bgOption {
+    padding: 8px;
+    margin: 6px 0;
+    background: #222;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+}
+
+#chatWindow {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px;
+    width: 80%;
+    max-width: 950px;
+    margin: auto;
+}
+
+.msg {
+    max-width: 75%;
+    padding: 12px 16px;
+    margin: 12px 0;
+    border-radius: 12px;
+    font-size: 15px;
+    word-wrap: break-word;
+    position: relative;
+}
+
+.me {
+    background: #007aff;
+    margin-left: auto;
+    text-align: right;
+}
+
+.other {
+    background: #2f2f2f;
+    margin-right: auto;
+    text-align: left;
+}
+
+.nameTag {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 3px;
+}
+
+.timestamp {
+    font-size: 11px;
+    opacity: 0.5;
+    margin-top: 4px;
+    display: block;
+}
+
+.receipt {
+    font-size: 11px;
+    opacity: 0.6;
+    display: block;
+}
+
+#typingStatus {
+    min-height: 20px;
+    font-size: 13px;
+    opacity: 0.7;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+#inputBar {
+    display: flex;
+    padding: 12px;
+    background: #111;
+    gap: 10px;
+    align-items: center;
+}
+
+#msgBox {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: #222;
+    color: white;
+    font-size: 15px;
+}
+
+#sendBtn {
+    padding: 10px 18px;
+    background: #007aff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    font-size: 15px;
+}
+
+#emojiBtn {
+    padding: 8px;
+    background: #333;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+#emojiPicker {
+    position: absolute;
+    bottom: 60px;
+    left: 20px;
+    background: #111;
+    border-radius: 8px;
+    display: none;
+    flex-wrap: wrap;
+    max-width: 300px;
+    padding: 8px;
+}
+.emoji {
+    cursor: pointer;
+    padding: 6px;
+    font-size: 20px;
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card" id="card">
-    <div class="header">
-      <div class="title">Chat</div>
-      <div class="controls">
-        <div id="roomLabel" class="btn" style="font-weight:normal;">room: —</div>
-        <button id="settingsBtn" class="btn">⚙️ Settings</button>
-      </div>
-    </div>
-    <div id="joinArea">
-      <input id="roomInput" placeholder="Room name (rose123)" />
-      <input id="nickInput" placeholder="Your name (Quarks)" />
-      <button id="joinBtn">Join</button>
-    </div>
-    <div id="settingsPanel">
-      <div style="font-weight:700;margin-bottom:6px">Backgrounds</div>
-      <div class="bgOption" data-id="1">Blue → Purple</div>
-      <div class="bgOption" data-id="2">Pink → Orange</div>
-      <div class="bgOption" data-id="3">Teal → Blue</div>
-      <div class="bgOption" data-id="4">Night Black</div>
-      <hr style="border:none;height:8px">
-      <div style="font-size:13px;opacity:0.9">Chat width</div>
-      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-        <button class="btn" data-width="90%">Narrow</button>
-        <button class="btn" data-width="100%">Full</button>
-      </div>
-    </div>
-    <div class="chatArea" id="chatArea">
-      <div id="emojiPicker"></div>
-      <div id="messages" aria-live="polite"></div>
-      <div id="typingStatus"></div>
-    </div>
-    <div class="inputBar">
-      <button id="emojiBtn" class="iconBtn">😊</button>
-      <input id="msgBox" placeholder="Write a message — Enter sends" />
-      <button id="sendBtn">Send</button>
-    </div>
-  </div>
+
+<div id="settingsBtn">⚙️ Settings</div>
+<div id="settingsPanel">
+    <div class="bgOption" onclick="changeBG('1')">Blue–Purple</div>
+    <div class="bgOption" onclick="changeBG('2')">Pink–Orange</div>
+    <div class="bgOption" onclick="changeBG('3')">Teal–Blue</div>
+    <div class="bgOption" onclick="changeBG('4')">Night Black</div>
+</div>
+
+<div id="chatWindow"></div>
+<div id="typingStatus"></div>
+
+<div id="inputBar">
+    <button id="emojiBtn">😊</button>
+    <input id="msgBox" placeholder="Type a message...">
+    <button id="sendBtn">Send</button>
+</div>
+
+<div id="emojiPicker">
+    <span class="emoji">😀</span><span class="emoji">😂</span><span class="emoji">😍</span>
+    <span class="emoji">😎</span><span class="emoji">😭</span><span class="emoji">👍</span>
+    <span class="emoji">🙏</span><span class="emoji">🎉</span><span class="emoji">💖</span>
 </div>
 
 <script>
-const WS_URL="wss://hack.chat/chat-ws";
-let ws=null, room="", nick="", typingTimeout=null;
-const messagesEl=document.getElementById("messages"), msgBox=document.getElementById("msgBox"), sendBtn=document.getElementById("sendBtn"), emojiBtn=document.getElementById("emojiBtn"), emojiPicker=document.getElementById("emojiPicker"), settingsBtn=document.getElementById("settingsBtn"), settingsPanel=document.getElementById("settingsPanel"), bgOptions=settingsPanel.querySelectorAll(".bgOption"), widthBtns=settingsPanel.querySelectorAll("button[data-width]"), joinBtn=document.getElementById("joinBtn"), roomInput=document.getElementById("roomInput"), nickInput=document.getElementById("nickInput"), roomLabel=document.getElementById("roomLabel"), typingStatus=document.getElementById("typingStatus");
+let room = prompt("Room name:");
+let myNick = prompt("Your name:");
+let typingTimeout;
 
-const EMOJI_LIST=["😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊","😋","😎","😍","😘","🥰","🙂","🤗","🤩","🤔","😐","😶","🙄","😏","😣","😥","😮","😯","😪","😫","😴","😌","😛","😜","😝","😒","😓","😔","😕","🙃","🥲","😲","😶‍🌫️","😳","🥺","😢","😭","😤","😡","😠","🤬","😈","👻","💀","🤖","👽","👍","👎","🙏","👏","💖","❤️","🔥","🌟","✨","🎉","🎶","🌹","🌙"];
+const chatWindow = document.getElementById("chatWindow");
+const msgBox = document.getElementById("msgBox");
+const sendBtn = document.getElementById("sendBtn");
+const typingStatus = document.getElementById("typingStatus");
+const emojiBtn = document.getElementById("emojiBtn");
+const emojiPicker = document.getElementById("emojiPicker");
 
-function populateEmoji(){emojiPicker.innerHTML="";EMOJI_LIST.forEach(e=>{const s=document.createElement("span");s.className="emoji";s.textContent=e;s.onclick=()=>{msgBox.value+=e;msgBox.focus()};emojiPicker.appendChild(s);});}
-populateEmoji();
+const ws = new WebSocket("wss://hack.chat/chat-ws");
 
-emojiBtn.addEventListener("click",e=>{e.stopPropagation();emojiPicker.style.display=emojiPicker.style.display==="block"?"none":"block";});
-document.addEventListener("click",e=>{if(emojiPicker.style.display==="block"&&!emojiPicker.contains(e.target)&&e.target!==emojiBtn){emojiPicker.style.display="none";}if(settingsPanel.style.display==="block"&&!settingsPanel.contains(e.target)&&e.target!==settingsBtn){settingsPanel.style.display="none";}});
+/* ---------------- SETTINGS ---------------- */
+const settingsBtn = document.getElementById("settingsBtn");
+const settingsPanel = document.getElementById("settingsPanel");
+settingsBtn.onclick = () => {
+    settingsPanel.style.display =
+        settingsPanel.style.display === "block" ? "none" : "block";
+};
+document.body.onclick = (e) => {
+    if (!["settingsBtn","settingsPanel"].includes(e.target.id))
+        settingsPanel.style.display = "none";
+};
 
-settingsBtn.addEventListener("click",e=>{e.stopPropagation();settingsPanel.style.display=settingsPanel.style.display==="block"?"none":"block";});
-bgOptions.forEach(o=>{o.addEventListener("click",()=>{switch(o.dataset.id){case"1":document.documentElement.style.setProperty('--bg','linear-gradient(135deg,#3a1c71,#d76d77,#ffaf7b)');break;case"2":document.documentElement.style.setProperty('--bg','linear-gradient(135deg,#ff6a88,#ff99ac)');break;case"3":document.documentElement.style.setProperty('--bg','linear-gradient(135deg,#11998e,#38ef7d)');break;case"4":document.documentElement.style.setProperty('--bg','linear-gradient(135deg,#0f0f0f,#1e1e1e)');break;}settingsPanel.style.display="none";});});
-widthBtns.forEach(b=>{b.addEventListener("click",()=>{document.documentElement.style.setProperty('--chat-width',b.dataset.width);});});
-
-function nowTime(){const d=new Date(),h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),ampm=h>=12?"PM":"AM";h=h%12||12;return`${h}:${m} ${ampm}`;}
-function renderMessage(nickVal,textVal,statusVal){const wrap=document.createElement("div");wrap.className="bubble "+(nickVal===nick?"mine":"their");const meta=document.createElement("div");meta.className="meta";meta.textContent=nickVal;wrap.appendChild(meta);const t=document.createElement("div");t.innerText=textVal;wrap.appendChild(t);const footer=document.createElement("div");footer.style.display="flex";footer.style.justifyContent=nickVal===nick?"flex-end":"flex-start";footer.style.alignItems="center";footer.style.gap="6px";const time=document.createElement("span");time.className="time";time.textContent=nowTime();footer.appendChild(time);if(nickVal===nick){const r=document.createElement("span");r.className="receipt";r.textContent=statusVal==="seen"?"✓✓ Seen":statusVal==="delivered"?"✓ Delivered":"";footer.appendChild(r);}wrap.appendChild(footer);messagesEl.appendChild(wrap);messagesEl.scrollTop=messagesEl.scrollHeight;}
-
-function connectWS(){
-  ws=new WebSocket(WS_URL);
-  ws.onopen=()=>{ws.send(JSON.stringify({cmd:"join",channel:room,nick:nick}));};
-  ws.onmessage=ev=>{
-    try{
-      const data=JSON.parse(ev.data);
-      if(data.cmd==="chat"&&data.channel===room){
-        if(data.nick!==nick){renderMessage(data.nick,data.text,"");}else{renderMessage(data.nick,data.text,"delivered");}
-      }
-      if(data.cmd==="typing"&&data.channel===room&&data.nick!==nick){typingStatus.textContent=`${data.nick} is typing…`;}
-      if(data.cmd==="stoptyping"&&data.channel===room&&data.nick!==nick){typingStatus.textContent="";}
-    }catch(e){console.warn("ws parse error",e);}
-  };
-  ws.onclose=()=>{typingStatus.textContent="Disconnected from server.";}
+function changeBG(id) {
+    const bgs = {
+        "1": "linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b)",
+        "2": "linear-gradient(135deg, #ff6a88, #ff99ac)",
+        "3": "linear-gradient(135deg, #11998e, #38ef7d)",
+        "4": "linear-gradient(135deg, #0f0f0f, #1e1e1e)"
+    };
+    document.body.style.background = bgs[id];
 }
 
-function sendMessage(){
-  const text=msgBox.value.trim();
-  if(!text||!ws||ws.readyState!==WebSocket.OPEN) return;
-  renderMessage(nick,text,"");
-  ws.send(JSON.stringify({cmd:"chat",text:text,channel:room}));
-  msgBox.value="";
-  ws.send(JSON.stringify({cmd:"stoptyping",channel:room,nick:nick}));
-}
-function sendTyping(){
-  if(!ws||ws.readyState!==WebSocket.OPEN) return;
-  ws.send(JSON.stringify({cmd:"typing",channel:room,nick:nick}));
-  clearTimeout(typingTimeout);
-  typingTimeout=setTimeout(()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({cmd:"stoptyping",channel:room,nick:nick}));},900);
-}
+/* ---------------- EMOJI ---------------- */
+emojiBtn.onclick = (e) => {
+    emojiPicker.style.display = emojiPicker.style.display === "flex" ? "none" : "flex";
+    emojiPicker.style.flexWrap = "wrap";
+};
 
-joinBtn.addEventListener("click",()=>{
-  const r=roomInput.value.trim(), n=nickInput.value.trim();
-  if(!r||!n) return alert("Enter room and your name");
-  room=r; nick=n;
-  roomLabel.textContent="room: "+room;
-  document.getElementById("joinArea").style.display="none";
-  connectWS();
+document.body.addEventListener("click", (e)=>{
+    if(!e.target.classList.contains("emoji") && e.target.id!=="emojiBtn")
+        emojiPicker.style.display = "none";
 });
 
-sendBtn.addEventListener("click",sendMessage);
-msgBox.addEventListener("keydown",(e)=>{
-  if(e.key==="Enter"){e.preventDefault();sendMessage();}
-  else sendTyping();
+document.querySelectorAll(".emoji").forEach(e => {
+    e.onclick = () => { msgBox.value += e.innerText; msgBox.focus(); };
 });
+
+/* ---------------- SEND MESSAGE ---------------- */
+function sendMessage() {
+    const msg = msgBox.value.trim();
+    if(!msg) return;
+    ws.send(JSON.stringify({cmd:"chat", text: msg}));
+    displayMessage(myNick, msg, "sent");
+    msgBox.value="";
+}
+sendBtn.onclick = sendMessage;
+msgBox.addEventListener("keydown", e => {
+    if(e.key==="Enter") sendMessage();
+    ws.send(JSON.stringify({cmd:"typing", room, nick: myNick}));
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(()=>ws.send(JSON.stringify({cmd:"stoptyping", room, nick: myNick})),800);
+});
+
+/* ---------------- WS CONNECTION ---------------- */
+ws.onopen = () => {
+    ws.send(JSON.stringify({cmd:"join", channel:room, nick:myNick}));
+};
+
+ws.onmessage = msg => {
+    const data = JSON.parse(msg.data);
+    if(data.cmd==="chat" && data.nick!==myNick) displayMessage(data.nick, data.text, "seen");
+    if(data.cmd==="typing" && data.nick!==myNick) typingStatus.innerText = `${data.nick} is typing…`;
+    if(data.cmd==="stoptyping" && data.nick!==myNick) typingStatus.innerText = "";
+};
+
+/* ---------------- DISPLAY ---------------- */
+function displayMessage(nick, text, status){
+    const bubble = document.createElement("div");
+    bubble.className = "msg "+(nick===myNick?"me":"other");
+    const time = new Date();
+    const t = time.getHours()+":"+time.getMinutes().toString().padStart(2,"0");
+    bubble.innerHTML = `<div class="nameTag">${nick}</div>${text}<span class="timestamp">${t}</span><span class="receipt">${nick===myNick?(status==="sent"?"✓ Delivered":"✓✓ Seen"):""}</span>`;
+    chatWindow.appendChild(bubble);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
 </script>
 </body>
 </html>
