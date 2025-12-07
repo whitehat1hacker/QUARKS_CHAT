@@ -16,18 +16,15 @@
     border:1px solid rgba(255,255,255,0.04);
   }
 
-  /* header */
   .header{display:flex;align-items:center;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.03)}
   .title{font-weight:700;color:#fff;display:flex;gap:10px;align-items:center}
   .controls{display:flex;gap:8px;align-items:center}
-  .btn {background:rgba(255,255,255,0.06);color:#fff;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;font-size:14px}
+  .muted{opacity:0.8;font-size:13px;color:rgba(255,255,255,0.9)}
 
-  /* join area */
   #joinArea{display:flex;flex-wrap:wrap;gap:6px;padding:8px;align-items:center}
   #joinArea input{flex:1;min-width:120px;padding:8px;border-radius:10px;border:none;outline:none;background:rgba(255,255,255,0.03);color:#fff;font-size:14px}
   #joinArea button{background:#ff7aa2;color:#fff;border:none;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:14px}
 
-  /* chat area */
   .chatArea{display:flex;flex-direction:column;flex:1;min-height:0;position:relative}
   #emojiPicker{position:absolute;bottom:60px;left:8px;width:calc(100% - 16px);max-height:200px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);padding:8px;border-radius:12px;display:none;overflow:auto;flex-wrap:wrap;gap:6px;z-index:40}
   .emoji{font-size:20px;padding:6px;cursor:pointer}
@@ -39,20 +36,15 @@
   .time{display:block;font-size:11px;opacity:0.75;margin-top:4px}
   #typingStatus{padding:4px 12px;font-size:13px;color:rgba(255,255,255,0.85);min-height:20px}
 
-  /* input bar */
   .inputBar{display:flex;gap:6px;padding:8px;background:rgba(0,0,0,0.12);align-items:center}
   #msgBox{flex:1;padding:10px 12px;border-radius:12px;border:none;outline:none;background:rgba(255,255,255,0.04);color:#fff;font-size:14px}
   .iconBtn{background:rgba(255,255,255,0.06);border-radius:12px;padding:8px;border:none;color:#fff;cursor:pointer;font-size:18px}
   #sendBtn{background:#ff6a95;color:#fff;padding:8px 12px;border-radius:12px;border:none;cursor:pointer;font-size:14px}
-
-  /* small helper */
-  .muted{opacity:0.8;font-size:13px;color:rgba(255,255,255,0.9)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-
     <div class="header">
       <div class="title">Chat</div>
       <div class="controls">
@@ -60,27 +52,23 @@
       </div>
     </div>
 
-    <!-- JOIN -->
     <div id="joinArea">
       <input id="roomInput" placeholder="Room name (rose123)" />
       <input id="nickInput" placeholder="Your name (Quarks)" />
       <button id="joinBtn">Join</button>
     </div>
 
-    <!-- CHAT -->
     <div class="chatArea" id="chatArea">
       <div id="emojiPicker"></div>
       <div id="messages" aria-live="polite"></div>
       <div id="typingStatus"></div>
     </div>
 
-    <!-- INPUT -->
     <div class="inputBar">
       <button id="emojiBtn" class="iconBtn">😊</button>
       <input id="msgBox" placeholder="Type message — Enter sends" />
       <button id="sendBtn">Send</button>
     </div>
-
   </div>
 </div>
 
@@ -113,7 +101,6 @@ function renderMessage(nickVal,textVal){
   messagesEl.scrollTop=messagesEl.scrollHeight;
 }
 
-/* =================== WebSocket =================== */
 function connectWS(){
   ws=new WebSocket(WS_URL);
   ws.onopen=()=>{ws.send(JSON.stringify({cmd:"join",channel:room,nick}));};
@@ -138,7 +125,6 @@ function sendMessage(){
 
 function sendTyping(){if(!ws||ws.readyState!==WebSocket.OPEN)return;ws.send(JSON.stringify({cmd:"typing",room,nick}));clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({cmd:"stoptyping",room,nick}));},900);}
 
-/* =================== Events =================== */
 joinBtn.addEventListener("click",()=>{
   const r=roomInput.value.trim();const n=nickInput.value.trim();
   if(!r||!n)return alert("Enter room & name");
@@ -150,21 +136,22 @@ joinBtn.addEventListener("click",()=>{
 
 sendBtn.addEventListener("click",sendMessage);
 
-// ======= FIXED: Enter key double-send (bulletproof) =====
+// ===== Bulletproof Enter key fix =====
+let enterPressed=false;
 msgBox.addEventListener("keydown", e => {
   if(e.key==="Enter" && !e.shiftKey){
     e.preventDefault();
-    if(ws && ws.readyState===WebSocket.OPEN && !msgBox.dataset.sent){
-      msgBox.dataset.sent="true";
+    if(!enterPressed){
+      enterPressed=true;
       sendMessage();
-      setTimeout(()=>{ msgBox.dataset.sent=""; },100);
     }
-  } else {
-    sendTyping();
-  }
+  } else sendTyping();
+});
+msgBox.addEventListener("keyup", e => {
+  if(e.key==="Enter") enterPressed=false;
 });
 
-/* emoji picker */
+// ===== Emoji picker =====
 function populateEmoji(){emojiPicker.innerHTML="";EMOJI_LIST.forEach(e=>{const s=document.createElement("span");s.className="emoji";s.textContent=e;s.onclick=()=>{msgBox.value+=e;msgBox.focus();};emojiPicker.appendChild(s);});}
 populateEmoji();
 
