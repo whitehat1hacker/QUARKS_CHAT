@@ -150,14 +150,14 @@ joinBtn.addEventListener("click",()=>{
 
 sendBtn.addEventListener("click",sendMessage);
 
-// ======= FIXED: Enter key double-send =====
+// ======= FIXED: Enter key double-send (bulletproof) =====
 msgBox.addEventListener("keydown", e => {
   if(e.key==="Enter" && !e.shiftKey){
     e.preventDefault();
-    if(!msgBox.dataset.sending){
-      msgBox.dataset.sending="true";
+    if(ws && ws.readyState===WebSocket.OPEN && !msgBox.dataset.sent){
+      msgBox.dataset.sent="true";
       sendMessage();
-      setTimeout(()=>{ msgBox.dataset.sending=""; },50);
+      setTimeout(()=>{ msgBox.dataset.sent=""; },100);
     }
   } else {
     sendTyping();
